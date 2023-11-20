@@ -1,0 +1,111 @@
+# This is the OpenAPI specification for your service. It is used to generate the client code.
+# To generate the server code, use the Gradle task `openApiGenerate`. The 
+# generated code will be placed in `build/generate-resources/main`.
+#
+# We will evaluate you based on how well you design your API.
+# 1. How well it follows REST principles.
+# 2. How easy it is to understand and use.
+#
+# References
+# 1. https://swagger.io/specification/
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: User Service
+  license:
+    name: MIT
+  x-oapi-codegen-middlewares:
+    - Middleware
+
+servers:
+  - url: http://localhost
+paths:
+  /api/products:
+    get:
+      summary: Add Company
+      operationId: AddProduct
+      responses:
+        '200':
+          description: Response create company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/productsResponse"
+        '400':
+          description: Bad Request Code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    HelloResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    productsResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+
+    DuplicateZeroResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            result:
+              type: array
+              items:
+                type: integer
+                format: int32
+
+      example:
+        code: 200
+        status: "200"
+        data:
+          result: [
+            1,
+            0,
+            0,
+            2,
+            3,
+            0,
+            0,
+            4
+          ]
+        message: Success
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        status:
+          type: string
+        errors:
+          type: string
+          properties:
+            list_error:
+              type: array
+              items:
+                type: string
+                description: List of errors
+      example:
+        code: 400
+        status: "400"
+        errors:
+          list_error:
+            - Ups Something When Wrong!
+        message: invalid request
