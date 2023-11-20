@@ -60,7 +60,6 @@ Aplicant
 |-------------|------------------------|
 | Umar rohman | umarrohman03@gmail.com |
 
-[![Code Coverage](https://codecov.io/gh/rifkytech86/Rifky-InterviewBackendSawitProGolang-20230607/branch/main/graph/badge.svg)](https://codecov.io/gh/rifkytech86/Rifky-InterviewBackendSawitProGolang-20230607)
 
 
 ### Explain Structure file
