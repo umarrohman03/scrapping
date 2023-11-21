@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/umarrohman03/scrapping/commons"
 	"github.com/umarrohman03/scrapping/internal/db"
@@ -63,6 +64,13 @@ func (r *ProductsRepository) InsertProduct(ctx context.Context, data models.Prod
 // GetProduct ...
 func (r *ProductsRepository) GetProduct(ctx context.Context) (string, error) {
 	fmt.Println("start get product repo")
+
+	// =============== multi thread ================
+	r.Scrapper.Limit(&colly.LimitRule{
+		Parallelism: 5,
+		Delay:       5 * time.Second,
+	})
+
 	//todo mode csv process to usecase
 	// ============== CREATE CSV ====================
 	fName := "tokopedia-list-product.csv"
@@ -79,26 +87,46 @@ func (r *ProductsRepository) GetProduct(ctx context.Context) (string, error) {
 	//todo get image still failed because the image exchange
 	//todo move css to env
 	//todo parse data
+	var row int
 	r.Scrapper.OnHTML("a.css-54k5sq div.css-16vw0vn", func(e *colly.HTMLElement) {
-
+		row++
 		rating := e.ChildAttrs("div.css-11s9vse img.css-177n1u3", "src")
 		image := e.ChildAttr("div.css-79elbk div.css-377m5r div.css-1g5og91 img", "src")
 		if image == "" {
 			image = "empty image url"
 		}
 		price := e.ChildText("div.css-11s9vse span.css-o5uqvq")
-		writer.Write([]string{
-			image,
-			e.ChildText("div.css-11s9vse"),
-			price,
-			strconv.Itoa(len(rating)),
-		})
+		if row < 100 {
+			writer.Write([]string{
+				image,
+				e.ChildText("div.css-11s9vse"),
+				price,
+				strconv.Itoa(len(rating)),
+			})
+		}
 
 	})
 
-	r.Scrapper.Visit("https://www.tokopedia.com/p/handphone-tablet/handphone?page=2")
-	// Display collector's statistics
-	log.Println(r.Scrapper)
+	// Start scraping in five threads on www.tokopedia.com
+	for i := 0; i < 5; i++ {
+		if i == 0 {
+			r.Scrapper.Visit(fmt.Sprintf("%s?page=%d", "https://www.tokopedia.com/p/handphone-tablet/handphone", i))
+		}
+		if i == 1 {
+			r.Scrapper.Visit(fmt.Sprintf("%s?page=%d", "https://www.tokopedia.com/p/handphone-tablet/handphone", i))
+		}
+		if i == 2 {
+			r.Scrapper.Visit(fmt.Sprintf("%s?page=%d", "https://www.tokopedia.com/p/handphone-tablet/handphone", i))
+		}
+		if i == 3 {
+			r.Scrapper.Visit(fmt.Sprintf("%s?page=%d", "https://www.tokopedia.com/p/handphone-tablet/handphone", i))
+		}
+		if i == 4 {
+			r.Scrapper.Visit(fmt.Sprintf("%s?page=%d", "https://www.tokopedia.com/p/handphone-tablet/handphone", i))
+		}
+	}
+	// Wait until threads are finished
+	r.Scrapper.Wait()
 
 	return "", nil
 }
