@@ -25,7 +25,7 @@ func NewProductUseCase(productRepo repositories.IProductsRepository) *ProductUse
 
 // AddProduct ...
 func (r *ProductUseCase) AddProduct() *models.Product {
-
+	fmt.Println("start use case")
 	//get product data from tokopedia
 	dataProduct, err := r.ProductRepo.GetProduct(context.Background())
 	if err != nil {

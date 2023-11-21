@@ -2,8 +2,12 @@ package repositories
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
 	"github.com/gocolly/colly"
+	"log"
+	"os"
+	"strconv"
 
 	"github.com/umarrohman03/scrapping/commons"
 	"github.com/umarrohman03/scrapping/internal/db"
@@ -58,25 +62,43 @@ func (r *ProductsRepository) InsertProduct(ctx context.Context, data models.Prod
 
 // GetProduct ...
 func (r *ProductsRepository) GetProduct(ctx context.Context) (string, error) {
+	fmt.Println("start get product repo")
+	//todo mode csv process to usecase
+	// ============== CREATE CSV ====================
+	fName := "tokopedia-list-product.csv"
+	file, err := os.Create(fName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+	// Write CSV header
+	writer.Write([]string{"Image", "Name", "Price", "Rating"})
 
 	//todo get image still failed because the image exchange
 	//todo move css to env
 	//todo parse data
 	r.Scrapper.OnHTML("a.css-54k5sq div.css-16vw0vn", func(e *colly.HTMLElement) {
 
-		image := e.ChildAttr("div.css-79elbk div.css-377m5r div.css-1g5og91 img", "src")
-		fmt.Println(image)
-
-		product := e.ChildText("div.css-11s9vse")
-		fmt.Println(product)
-
-		price := e.ChildText("div.css-11s9vse span.css-o5uqvq")
-		fmt.Println(price)
-
 		rating := e.ChildAttrs("div.css-11s9vse img.css-177n1u3", "src")
-		fmt.Println(len(rating))
+		image := e.ChildAttr("div.css-79elbk div.css-377m5r div.css-1g5og91 img", "src")
+		if image == "" {
+			image = "empty image url"
+		}
+		price := e.ChildText("div.css-11s9vse span.css-o5uqvq")
+		writer.Write([]string{
+			image,
+			e.ChildText("div.css-11s9vse"),
+			price,
+			strconv.Itoa(len(rating)),
+		})
 
 	})
+
+	r.Scrapper.Visit("https://www.tokopedia.com/p/handphone-tablet/handphone?page=2")
+	// Display collector's statistics
+	log.Println(r.Scrapper)
 
 	return "", nil
 }

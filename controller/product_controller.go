@@ -24,5 +24,6 @@ func NewProductController(productUseCase usecase.IProductUseCase) IProductContro
 // AddProduct ...
 func (r ProductController) AddProduct(ctx echo.Context) error {
 	fmt.Println("start product controller")
+	r.ProductUseCase.AddProduct()
 	return nil
 }

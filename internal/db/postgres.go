@@ -16,6 +16,7 @@ type PostgresClient struct {
 }
 
 func NewPostgresDatabase(env *env.ENV) PostgresClient {
+	fmt.Println("start postgres")
 	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	dbHost := env.DBPostgresHost
